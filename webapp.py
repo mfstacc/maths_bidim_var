@@ -1,9 +1,37 @@
 import streamlit as st
 import pandas as pd
 from math import pow
+from numpy import sum
+
+
+def double_entry_table(in_df, f_x, f_y):
+    diff_x_vals = list(set(in_df[f_x]))
+    diff_y_vals = list(set(in_df[f_y]))
+
+    distrib_table = pd.DataFrame(index=diff_y_vals,
+                                 columns=diff_x_vals,
+                                 dtype='int16')
+
+    distrib_table['Total'] = 0 
+
+    for i, x in enumerate(diff_x_vals):
+        for j, y in enumerate(diff_y_vals):
+            distrib_table.iloc[j, i] = len(df.loc[(in_df[f_x] == x) &
+                                                  (in_df[f_y] == y)])
+
+    for j, y in enumerate(diff_y_vals):
+        distrib_table.iloc[j, -1] = sum(distrib_table.iloc[j])
+
+    diff_y_vals.append('Total')
+    distrib_table = distrib_table.reindex(diff_y_vals)
+
+    for i, col in enumerate(distrib_table):
+        distrib_table.iloc[-1, i] = sum(distrib_table[col])
+
+    return distrib_table
+
 
 # ------------ MAIN PAGE -----------------
-
 st.title('Analizador de notas')
 st.markdown("""
             <details>
@@ -88,7 +116,20 @@ if raw_file and enough_features:
                 elegidas dentro de los datos importados. *Para importar un
                 conjunto de datos, dirígete al panel lateral de la página*.
                 """)
-    # Introduce all the logic related to those tables
+
+    rel_freq, double_entry = st.columns(2)
+
+    with rel_freq:
+        st.markdown('<p style="text-align: center; font-size: 20px;">\
+                    Tabla de frecuencias relativas</p>',
+                    unsafe_allow_html=True)
+
+        st.dataframe(df.value_counts())
+
+    with double_entry:
+        st.markdown('<p style="text-align: center; font-size: 20px;">\
+                    Tabla de doble entrada</p>', unsafe_allow_html=True)
+        st.dataframe(double_entry_table(df, x, y))
 
     st.subheader('Métricas estadísticas')
     st.markdown("""
@@ -109,20 +150,23 @@ if raw_file and enough_features:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown('<h3 style="text-align: center; padding: 0;">Métricas variable X</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 style="text-align: center; padding: 0;">\
+                     Métricas variable X</h3>', unsafe_allow_html=True)
 
         st.latex(r'\Large\bar{x}=' + str(round(mean_x, 3)))
         st.latex(r'\Large\sigma_x=' + str(round(std_x, 3)))
         st.latex(r'\Large\sigma^2_x=' + str(round(var_x, 3)))
 
     with col2:
-        st.markdown('<h3 style="text-align: center; padding: 0;">Métricas variable Y</h3>', unsafe_allow_html=True)
+        st.markdown('<h3 style="text-align: center; padding: 0;">\
+                     Métricas variable Y</h3>', unsafe_allow_html=True)
 
         st.latex(r'\Large\bar{x}=' + str(round(mean_y, 3)))
         st.latex(r'\Large\sigma_x=' + str(round(std_y, 3)))
         st.latex(r'\Large\sigma^2_x=' + str(round(var_y, 3)))
 
-    st.markdown('<h3 style="text-align: center;">Métricas de X e Y</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 style="text-align: center;">\
+                 Métricas de X e Y</h3>', unsafe_allow_html=True)
 
     cov_xy = df.cov(ddof=0)[x][y]
     r2 = cov_xy / (std_x * std_y)

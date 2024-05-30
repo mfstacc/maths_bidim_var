@@ -5,3 +5,5 @@ lib64
 share
 etc
 pyvenv.cfg
+test*
+*.csv
