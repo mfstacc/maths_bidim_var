@@ -81,25 +81,61 @@ def corr_coef_state(r2):
 
 
 # ------------ MAIN PAGE -----------------
-st.title('Analizador de notas')
-st.markdown("""
-            <details>
-            <summary style="font-size: 22px">
-                <strong>Información sobre la web</strong>
-            </summary>
-            <p>
-            Esta página tiene por objetivo constituir un sistema de análisis
-            que tome por entrada un conjunto de datos en el que se contemplen
-            dos clases diferenciadas (<em>particularmente, está enfocado a las
-            calificaciones de los alumnos en dos materias distintas, en dos
-            trimestres diferentes o ambas a la vez</em>) y genere las métricas
-            propias de la estadística bidimensional además de un modelo de
-            estimación teniendo en cuenta tanto una nota como la otra de
-            variable independiente.
-            </p>
-            </details>
-            """, unsafe_allow_html=True)
+st.title('Analizador de notas 📋')
+st.warning("""
+           Esta web todavía se encuentra en fase temprana de desarrollo,
+           por lo que podrían darse algunos errores a la hora de analizar
+           los datos. En caso de encontrar algún error, puedes enviarlo
+           al correo moon0xcoder@gmail.com.
+           """, icon='⚠️')
+show_instructions = st.checkbox(label='Mostar instrucciones',
+                                value=True)
 
+if show_instructions:
+    st.markdown("""
+                ## Información sobre la web</strong>
+                Esta página busca automatizar el proceso de estudio de una
+                variable bidimensional en todos los pasos necesarios para
+                llegar al cálculo de las rectas de regresión.
+
+                ### Intsrucciones para utilizar la aplicación:
+                - Descarga tu hoja de cálculo como un archivo **.xlsx** o
+                **.csv**.
+
+                - Dirígete a la **barra lateral** (*si no está desplegada,
+                puedes encontrar una pequeña flecha arriba a la izquierda de la
+                página*).
+
+                - En el apartado **"Carga de datos"**, enocntrarás un
+                **recuadro de color negro**, haz click sobre él o
+                sobre el botón "**Browse Files**".
+
+                - Después, te toparás con un elemento para **seleccionar
+                las columnas que corresponden a la variable x e y** dentro
+                de tu conjunto de datos.
+
+                - Finalmente, encontrarás dos elementos para **seleccionar
+                la columna** que se tomará como la **variable x** y la que se
+                tomará como la **variable y**.
+
+                Es posible que encuentres un error relativo a los datos
+                importados. Este error se debe principalmente a un fallo a la
+                hora de procesar los valores numéricos de la columna en
+                particular.
+
+                En caso de encontrar dicho error, puedes crear una hoja de
+                cálculo nueva en la que introduzcas únicamente los datos
+                obtenidos para el estudio estadístico. Eso debería 
+                solucionarlo.
+
+                Aquí puedes descargarte un archivo de referencia con el formato
+                adecuado para probar la aplicación.
+                """, unsafe_allow_html=True)
+
+    with open('base.xlsx', 'rb') as f:
+        st.download_button(label='Descargar datos de prueba',
+                           file_name='datos.xlsx',
+                           data=f)
 
 # ---------------- SIDEBAR -------------------
 with st.sidebar:
@@ -161,10 +197,9 @@ if raw_file and enough_features:
     st.header('Análisis de los datos')
     st.subheader('Tablas de variable bidimensional')
     st.markdown("""
-                En este apartado se podrán encontrar las tablas de frecuencia y
-                doble entrada de variable bidimensional acorde a las variables
-                elegidas dentro de los datos importados. *Para importar un
-                conjunto de datos, dirígete al panel lateral de la página*.
+                En este apartado se podrán encontrar las **tablas de frecuencia
+                relativa** y **doble entrada de variable bidimensional** acorde
+                a las variables elegidas dentro de los datos importados.
                 """)
 
     rel_freq, double_entry = st.columns(2)
@@ -185,11 +220,12 @@ if raw_file and enough_features:
 
 # ----------- STAT MEASURES -----------
 
-    st.subheader('Métricas estadísticas')
+    st.subheader('Medidas estadísticas')
     st.markdown("""
-                En este apartado se puede encontrar el valor de las métricas
-                estadísticas correspondientes al estudio de la variable
-                bidimensional.
+                En este apartado se puede encontrar el valor de las medidas
+                estadísticas referentes a **cada variable** medida (*x e y*) y
+                las medidas estadísticas que involucran **a ambas en
+                conjunto**.
                 """)
 
     mean_x = df[x].mean()
@@ -205,7 +241,7 @@ if raw_file and enough_features:
 
     with col1:
         st.markdown('<h3 style="text-align: center; padding: 0;">\
-                     Métricas variable X</h3>', unsafe_allow_html=True)
+                     Medidas variable X</h3>', unsafe_allow_html=True)
 
         st.latex(r'\Large\bar{x}=' + str(round(mean_x, 3)))
         st.latex(r'\Large\sigma_x=' + str(round(std_x, 3)))
@@ -213,14 +249,14 @@ if raw_file and enough_features:
 
     with col2:
         st.markdown('<h3 style="text-align: center; padding: 0;">\
-                     Métricas variable Y</h3>', unsafe_allow_html=True)
+                     Medidas variable Y</h3>', unsafe_allow_html=True)
 
         st.latex(r'\Large\bar{y}=' + str(round(mean_y, 3)))
         st.latex(r'\Large\sigma_y=' + str(round(std_y, 3)))
         st.latex(r'\Large\sigma^2_y=' + str(round(var_y, 3)))
 
     st.markdown('<h3 style="text-align: center;">\
-                 Métricas de X e Y</h3>', unsafe_allow_html=True)
+                 Medidas de X e Y</h3>', unsafe_allow_html=True)
 
     cov_xy = df.cov(ddof=0)[x][y]
     r2 = cov_xy / (std_x * std_y)
@@ -232,9 +268,13 @@ if raw_file and enough_features:
 
     st.subheader('Diagrama de dispersión')
     st.markdown("""
-                En este apartado podrás observar la relación entre las métricas
-                de la covarianza y el coeficiente de correlación de Pearson y
-                la disposición de los puntos en la nube de puntos.
+                En este apartado podrás observar **gráficamente** cómo se
+                realicionan los **valores obteniods** para la **covarianza**
+                y el **coeficiente de correlación de Pearson** con el diagrama
+                de **dispersión** o **nube de puntos**. Debajo del gráfico se
+                encuentran las condiciones matemáticas que se cumplen con
+                los valores obtenidos para ambas medidas acorde al tipo
+                de relación y correlación de los datos.
                 """)
 
     st.pyplot(plt.scatter(data=df, x=y, y=x).figure)
@@ -244,9 +284,8 @@ if raw_file and enough_features:
 
     st.subheader('Regresión Lineal')
     st.markdown("""
-                En este apartado se muestran los diagramas de dispersión con
-                las respectivas rectas de regresión de una variable sobre la
-                otra.
+                En este apartado se muestran las **rectas de regresión**
+                de una variable sobre la otra y sus respectivas **ecuaciones**.
                 """)
 
     xy_regr_col, yx_regr_col = st.columns(2)
@@ -294,10 +333,13 @@ if raw_file and enough_features:
 
     st.subheader('Aplicación de las rectas de regresión')
     st.markdown("""
-                Finalmente, en este apartado puedes introducir valores
-                para cada una de las variables, de modo que se realice
-                una estimación utilizando la ecuación de las rectas de
-                regresión calculadas:
+                Finalmente, en este apartado puedes realizar **estimaciones**
+                de los valores que se obtendrían en función de la otra 
+                variable, utilizando las **rectas de regresión** calculadas 
+                anteriormente. *Recuerda que la fiabilidad de las estimaciones
+                depende del valor del coeficiente de correlación, cuanto más
+                próximo esté a 1 o -1 mayor será la correlación entre los datos
+                y más fiable será la estimación*.
                 """)
 
     x_pred_col, y_pred_col = st.columns(2)
